@@ -7,21 +7,53 @@ package codigo;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author user1
  */
 public class Archivo {
+
     private String ruta;
 
     public Archivo(String ruta) {
         this.ruta = ruta;
     }
-    
+
+    public void guardarLLave(Object llave, String ext) {
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ruta.replaceAll(".txt", ext)));
+            oos.writeObject(llave);
+            oos.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public Object leerLlave() {
+        Object llave = null;
+        try {
+            ObjectInputStream oos = new ObjectInputStream(new FileInputStream(ruta));
+            llave = oos.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("No se ha podido leer la llave");
+        }
+        return llave;
+    }
+
     public String getInfo() { //Devuelve la informacion del archivo
         File archivo = null;
         FileReader fr = null;
@@ -37,7 +69,7 @@ public class Archivo {
             // Lectura del fichero
             String linea;
             while ((linea = br.readLine()) != null) {
-                texto = texto +  linea + "\n";
+                texto = texto + linea + "\n";
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,12 +87,46 @@ public class Archivo {
         }
         return texto;
     }
-    
-    public void saveInfo(String ext, String text){
+
+    public void saveBytes(String ext, byte[] fileArray) {
+        FileOutputStream fileOuputStream = null;
+        try {
+            fileOuputStream = new FileOutputStream(ruta.replaceAll(".txt", ext));
+            fileOuputStream.write(fileArray);
+            fileOuputStream.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fileOuputStream.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public byte[] getBytes() {
+        FileInputStream fileInputStream = null;
+        File file = new File(ruta);
+        byte[] fileArray = new byte[(int) file.length()];
+        try {
+            fileInputStream = new FileInputStream(file);
+            fileInputStream.read(fileArray);
+            fileInputStream.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return fileArray;
+    }
+
+    public void saveInfo(String ext, String text) {
         FileWriter fichero = null;
         PrintWriter pw = null;
-        try
-        {
+        try {
             fichero = new FileWriter(ruta.replaceAll(".txt", ext));
             pw = new PrintWriter(fichero);
 
@@ -69,14 +135,15 @@ public class Archivo {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-           try {
-           // Nuevamente aprovechamos el finally para 
-           // asegurarnos que se cierra el fichero.
-           if (null != fichero)
-              fichero.close();
-           } catch (Exception e2) {
-              e2.printStackTrace();
-           }
+            try {
+                // Nuevamente aprovechamos el finally para 
+                // asegurarnos que se cierra el fichero.
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
         }
     }
 }

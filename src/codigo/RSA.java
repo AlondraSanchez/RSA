@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public class RSA {
+public class RSA implements Serializable{
 
     public RSA() {
          Security.addProvider(new BouncyCastleProvider());
@@ -20,6 +20,11 @@ public class RSA {
             KeyPair clavesRSA = keyGen.generateKeyPair();
             PrivateKey clavePrivada = clavesRSA.getPrivate(); 
             PublicKey clavePublica = clavesRSA.getPublic();
+            
+            Archivo a = new Archivo("Llave.txt");
+            a.guardarLLave(clavePublica, "Publica.txt");
+            a.guardarLLave(clavePrivada, "Privada.txt");
+            
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
             Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -39,15 +44,13 @@ public class RSA {
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
                 Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
             }
-            mostrarBytes(bufferCifrado);
-            return bufferCifrado;
         } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException ex) {
             Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
         }
         return bufferCifrado;
     }
     
-    public void decifrarLLavePrivada(byte[] cipherText,PrivateKey clavePrivada){
+    public byte[] decifrarLLavePrivada(byte[] cipherText,PrivateKey clavePrivada){
         byte[] bufferPlano2 = null;
         try {
             Cipher cifrador = Cipher.getInstance("RSA", "BC");
@@ -61,10 +64,10 @@ public class RSA {
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
                 Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
             }
-            mostrarBytes(bufferPlano2);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException ex) {
             Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return bufferPlano2;
     }
     
     public byte[] cifrarLLavePrivada(byte[] plainText, PrivateKey clavePrivada){
@@ -81,7 +84,6 @@ public class RSA {
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
                 Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
             }
-            mostrarBytes(bufferPlano2);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException ex) {
             Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -102,28 +104,8 @@ public class RSA {
             } catch (IllegalBlockSizeException | BadPaddingException ex) {
                 Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
             }
-            mostrarBytes(bufferPlano2);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException ex) {
             Logger.getLogger(RSA.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public byte[] leerLinea(java.io.InputStream in) throws IOException {
-        byte[] buffer1 = new byte[1000];
-        int i = 0;
-        byte c;
-        c = (byte) in.read();
-        while ((c != '\n') && (i < 1000)) {
-            buffer1[i] = c;
-            c = (byte) in.read();
-            i++;
-        }
-        byte[] buffer2 = new byte[i];
-        System.arraycopy(buffer1, 0, buffer2, 0, i);
-        return (buffer2);
-    }
-
-    public void mostrarBytes(byte[] buffer) {
-        System.out.write(buffer, 0, buffer.length);
     }
 }
